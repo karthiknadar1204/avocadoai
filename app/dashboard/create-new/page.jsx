@@ -7,11 +7,13 @@ import SelectStyle from "./_components/SelectStyle";
 import SelectDuration from "./_components/SelectDuration";
 import { Button } from "@/components/ui/button";
 import CustomLoading from "./_components/CustomLoading";
+import { v4 as uuidv4 } from "uuid";
 
 const CreateNew = () => {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
-  const [videoScript, setVideoScript] = useState();
+  const [videoScript, setVideoScript] = useState(null);
+  const [audioFileUrl, setAudioFileUrl] = useState(null);
 
   const onHandleInputChange = (fieldName, fieldValue) => {
     setFormData((prev) => ({ ...prev, [fieldName]: fieldValue }));
@@ -39,11 +41,46 @@ const CreateNew = () => {
       console.log("prompt", prompt);
       const response = await axios.post("/api/get-video-script", { prompt: prompt });
       console.log("data", response.data);
-      setVideoScript(response.data.result);
+      
+      if (response.data && response.data.result) {
+        setVideoScript(response.data.result);
+        const audioUrl = await GenerateAudio(response.data.result);
+        setAudioFileUrl(audioUrl);
+      } else {
+        console.error("Invalid response format from get-video-script API");
+      }
     } catch (error) {
       console.error("Error fetching video script:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const GenerateAudio = async (script) => {
+    try {
+      if (!script || !Array.isArray(script)) {
+        console.error("Invalid video script data");
+        return;
+      }
+
+      let fullScript = "";
+      const id = uuidv4();
+      script.forEach((element) => {
+        if (element && element.contextText) {
+          fullScript += element.contextText + " ";
+        }
+      });
+      console.log("Full script:", fullScript);
+      
+      if (fullScript.trim() === "") {
+        console.error("Empty script generated");
+        return;
+      }
+
+      const response = await axios.post("/api/generate-audio", { text: fullScript, id: id });
+      console.log("Audio generation response:", response.data);
+    } catch (error) {
+      console.error("Error generating audio:", error);
     }
   };
 
