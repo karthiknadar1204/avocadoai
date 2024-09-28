@@ -22,12 +22,12 @@ export async function POST(req, res) {
   };
 
   const [response] = await client.synthesizeSpeech(request);
-  
+
 const audioBuffer = Buffer.from(response.audioContent, "binary");
 const uploadTask = await uploadBytesResumable(storageRef, audioBuffer,{contentType: "audio/mp3"});
 const url = await getDownloadURL(uploadTask.ref);
 console.log("Audio content written to file: output.mp3");
 console.log("url",url);
 
-  return NextResponse.json({ result: "success" });
+  return NextResponse.json({ result: url });
 }

@@ -9,11 +9,17 @@ import { Button } from "@/components/ui/button";
 import CustomLoading from "./_components/CustomLoading";
 import { v4 as uuidv4 } from "uuid";
 
+
+
+const FILEURL="https://firebasestorage.googleapis.com/v0/b/avocadoai-5a34b.appspot.com/o/avocado-ai-files%2F5b2dc991-d45f-42fd-9bad-ff696c32bc56.mp3?alt=media&token=6cf83e21-98ee-4a9d-82a1-dba0b6676ca4"
+
 const CreateNew = () => {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [videoScript, setVideoScript] = useState(null);
   const [audioFileUrl, setAudioFileUrl] = useState(null);
+  const [captions,setCaptions]=useState()
+  const [audio,setAudio]=useState(null)
 
   const onHandleInputChange = (fieldName, fieldValue) => {
     setFormData((prev) => ({ ...prev, [fieldName]: fieldValue }));
@@ -21,6 +27,7 @@ const CreateNew = () => {
 
   const onCreateClickHandler = () => {
     getVideoScript();
+    // getCaption(FILEURL);
   };
 
   const getVideoScript = async () => {
@@ -39,6 +46,7 @@ const CreateNew = () => {
         formData.imageStyle +
         " format for each scene and give me result in JSON format with imagePrompt and contextText as field";
       console.log("prompt", prompt);
+
       const response = await axios.post("/api/get-video-script", { prompt: prompt });
       console.log("data", response.data);
       
@@ -78,9 +86,29 @@ const CreateNew = () => {
       }
 
       const response = await axios.post("/api/generate-audio", { text: fullScript, id: id });
-      console.log("Audio generation response:", response.data);
+      console.log("Audio generation response:", response.data.result);
+      setAudio(response.data.result)
+      response.data.result&&getCaption(response.data.result)
     } catch (error) {
       console.error("Error generating audio:", error);
+    }
+  };
+
+  const getCaption = async (fileurl) => {
+    try {
+      setLoading(true)
+      console.log("fileurl",fileurl)
+      const response = await axios.post("/api/generate-caption", { audioUrl: fileurl });
+      console.log("Caption generation response:", response.data.result);
+      setCaptions(response.data.result)
+      setLoading(false)
+      return response?.data?.result;
+    } catch (error) {
+      console.error("Error generating caption:", error);
+      if (error.response && error.response.status === 500) {
+        console.error("Server error: ", error.response.data);
+      }
+      throw error;
     }
   };
 
