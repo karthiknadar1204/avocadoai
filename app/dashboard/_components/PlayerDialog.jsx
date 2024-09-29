@@ -15,11 +15,13 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/configs/db";
 import { VideoData } from "@/configs/schema";
 import { eq } from "drizzle-orm";
+import { useRouter } from "next/navigation";
 
-const PlayerDialog = ({ playVideo, videoId }) => {
+const PlayerDialog = ({ playVideo, videoId, onClose }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [videoData, setVideoData] = useState(null);
   const [durationInFrame, setDurationInFrame] = useState(100);
+  const router = useRouter();
 
   useEffect(() => {
     setOpenDialog(playVideo);
@@ -35,8 +37,15 @@ const PlayerDialog = ({ playVideo, videoId }) => {
     setVideoData(result[0]);
   };
 
+  const handleCancel = () => {
+    setOpenDialog(false);
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={openDialog}>
+    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogContent className="flex flex-col items-center justify-center">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold my-5">
@@ -57,7 +66,7 @@ const PlayerDialog = ({ playVideo, videoId }) => {
               }}
             />
             <div className="flex gap-10 mt-10">
-              <Button>Cancel</Button>
+              <Button onClick={handleCancel}>Cancel</Button>
               <Button>Export</Button>
             </div>
           </DialogDescription>
