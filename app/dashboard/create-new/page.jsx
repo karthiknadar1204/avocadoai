@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import CustomLoading from "./_components/CustomLoading";
 import { v4 as uuidv4 } from "uuid";
 
-const FILEURL="https://firebasestorage.googleapis.com/v0/b/avocadoai-5a34b.appspot.com/o/avocado-ai-files%2F5b2dc991-d45f-42fd-9bad-ff696c32bc56.mp3?alt=media&token=6cf83e21-98ee-4a9d-82a1-dba0b6676ca4"
+const FILEURL =
+  "https://firebasestorage.googleapis.com/v0/b/avocadoai-5a34b.appspot.com/o/avocado-ai-files%2F5b2dc991-d45f-42fd-9bad-ff696c32bc56.mp3?alt=media&token=6cf83e21-98ee-4a9d-82a1-dba0b6676ca4";
 
 const CreateNew = () => {
   const [formData, setFormData] = useState({});
@@ -46,7 +47,9 @@ const CreateNew = () => {
         " format for each scene and give me result in JSON format with imagePrompt and contextText as field";
       console.log("prompt", prompt);
 
-      const response = await axios.post("/api/get-video-script", { prompt: prompt });
+      const response = await axios.post("/api/get-video-script", {
+        prompt: prompt,
+      });
       console.log("data", response.data);
 
       if (response.data && response.data.result) {
@@ -79,13 +82,16 @@ const CreateNew = () => {
         }
       });
       console.log("Full script:", fullScript);
-      
+
       if (fullScript.trim() === "") {
         console.error("Empty script generated");
         return;
       }
 
-      const response = await axios.post("/api/generate-audio", { text: fullScript, id: id });
+      const response = await axios.post("/api/generate-audio", {
+        text: fullScript,
+        id: id,
+      });
       console.log("Audio generation response:", response.data.result);
       setAudio(response.data.result);
       if (response.data.result) {
@@ -100,7 +106,9 @@ const CreateNew = () => {
     try {
       setLoading(true);
       console.log("fileurl", fileurl);
-      const response = await axios.post("/api/generate-caption", { audioUrl: fileurl });
+      const response = await axios.post("/api/generate-caption", {
+        audioUrl: fileurl,
+      });
       console.log("Caption generation response:", response.data.result);
       setCaptions(response.data.result);
       await generateImages();
@@ -124,7 +132,9 @@ const CreateNew = () => {
       for (const element of videoScriptData) {
         if (element && element.imagePrompt) {
           console.log("Image prompt:", element.imagePrompt);
-          const response = await axios.post("/api/generate-image", { prompt: element.imagePrompt });
+          const response = await axios.post("/api/generate-image", {
+            prompt: element.imagePrompt,
+          });
           console.log("Image generation response:", response.data.result);
           newImages.push(response.data.result);
         }
@@ -162,7 +172,12 @@ const CreateNew = () => {
           <h3 className="text-xl font-bold">Generated Images:</h3>
           <div className="grid grid-cols-2 gap-4 mt-4">
             {images.map((imageUrl, index) => (
-              <img key={index} src={imageUrl} alt={`Generated image ${index + 1}`} className="w-full h-auto" />
+              <img
+                key={index}
+                src={imageUrl}
+                alt={`Generated image ${index + 1}`}
+                className="w-full h-auto"
+              />
             ))}
           </div>
         </div>
