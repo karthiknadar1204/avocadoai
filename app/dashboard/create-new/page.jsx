@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button";
 import CustomLoading from "./_components/CustomLoading";
 import { v4 as uuidv4 } from "uuid";
 
-
-
 const FILEURL="https://firebasestorage.googleapis.com/v0/b/avocadoai-5a34b.appspot.com/o/avocado-ai-files%2F5b2dc991-d45f-42fd-9bad-ff696c32bc56.mp3?alt=media&token=6cf83e21-98ee-4a9d-82a1-dba0b6676ca4"
 
 const CreateNew = () => {
@@ -18,9 +16,9 @@ const CreateNew = () => {
   const [loading, setLoading] = useState(false);
   const [videoScript, setVideoScript] = useState(null);
   const [audioFileUrl, setAudioFileUrl] = useState(null);
-  const [captions,setCaptions]=useState()
-  const [audio,setAudio]=useState(null)
-  const [images,setImages]=useState([])
+  const [captions, setCaptions] = useState(null);
+  const [audio, setAudio] = useState(null);
+  const [images, setImages] = useState([]);
   const [videoScriptData, setVideoScriptData] = useState(null);
 
   const onHandleInputChange = (fieldName, fieldValue) => {
@@ -50,12 +48,7 @@ const CreateNew = () => {
 
       const response = await axios.post("/api/get-video-script", { prompt: prompt });
       console.log("data", response.data);
-      //this has to be passed to generate images via iteration mkc.
 
-
-
-
-      
       if (response.data && response.data.result) {
         setVideoScript(response.data.result);
         setVideoScriptData(response.data.result);
@@ -94,8 +87,10 @@ const CreateNew = () => {
 
       const response = await axios.post("/api/generate-audio", { text: fullScript, id: id });
       console.log("Audio generation response:", response.data.result);
-      setAudio(response.data.result)
-      response.data.result&&getCaption(response.data.result)
+      setAudio(response.data.result);
+      if (response.data.result) {
+        await getCaption(response.data.result);
+      }
     } catch (error) {
       console.error("Error generating audio:", error);
     }
@@ -103,12 +98,12 @@ const CreateNew = () => {
 
   const getCaption = async (fileurl) => {
     try {
-      setLoading(true)
-      console.log("fileurl",fileurl)
+      setLoading(true);
+      console.log("fileurl", fileurl);
       const response = await axios.post("/api/generate-caption", { audioUrl: fileurl });
       console.log("Caption generation response:", response.data.result);
-      setCaptions(response.data.result)
-      generateImages()
+      setCaptions(response.data.result);
+      await generateImages();
       return response?.data?.result;
     } catch (error) {
       console.error("Error generating caption:", error);
@@ -116,9 +111,10 @@ const CreateNew = () => {
         console.error("Server error: ", error.response.data);
       }
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
-
 
   const generateImages = async () => {
     try {
@@ -127,6 +123,7 @@ const CreateNew = () => {
       const newImages = [];
       for (const element of videoScriptData) {
         if (element && element.imagePrompt) {
+          console.log("Image prompt:", element.imagePrompt);
           const response = await axios.post("/api/generate-image", { prompt: element.imagePrompt });
           console.log("Image generation response:", response.data.result);
           newImages.push(response.data.result);
