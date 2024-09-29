@@ -3,6 +3,7 @@ import {
   AbsoluteFill,
   Audio,
   Img,
+  interpolate,
   Sequence,
   useCurrentFrame,
   useVideoConfig,
@@ -35,11 +36,25 @@ const RemotionVideo = ({
   return (
     <div>
       <AbsoluteFill style={{ backgroundColor: "black" }}>
-        {imageList?.map((item, index) => (
+        {imageList?.map((item, index) => 
+        {
+          const startTime=(index*getDurationInFrame())/imageList?.length;
+          const duration=getDurationInFrame();
+
+          const scale=(index)=>interpolate(
+            frame,
+            [startTime,startTime+duration/2,startTime+duration],
+            index%2==0?[1,1.8,1]:[1.8,1,1.8],
+            {
+              extrapolateLeft:"clamp",
+              extrapolateRight:"clamp",
+            }
+          )
+          return(
           <>
             <Sequence
               key={index}
-              from={(index * getDurationInFrame()) / imageList?.length}
+              from={startTime}
               durationInFrames={getDurationInFrame()}
             >
               <AbsoluteFill
@@ -51,6 +66,7 @@ const RemotionVideo = ({
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
+                    transform: `scale(${scale(index)})`,
                   }}
                 />
                 <AbsoluteFill
@@ -70,7 +86,7 @@ const RemotionVideo = ({
               </AbsoluteFill>
             </Sequence>
           </>
-        ))}
+        )})}
         <Audio src={audioFileUrl} />
       </AbsoluteFill>
     </div>

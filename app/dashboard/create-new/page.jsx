@@ -24,8 +24,8 @@ const CreateNew = () => {
   const [audio, setAudio] = useState(null);
   const [images, setImages] = useState([]);
   const [videoScriptData, setVideoScriptData] = useState(null);
-  const [playVideo, setPlayVideo] = useState(true);
-  const [videoId, setVideoId] = useState(6);
+  const [playVideo, setPlayVideo] = useState(false);
+  const [videoId, setVideoId] = useState(null);
 
   const { videoData, setVideoData } = useContext(VideoDataContext);
 
@@ -177,11 +177,13 @@ const CreateNew = () => {
         audioFileUrl: videoData.audio,
         captions: videoData.captions,
         imageList: videoData.images,
-      }).returning({id:videoData.id})
-      setVideoId(response[0].id);
-      console.log("videoId",videoId);
+      });
+      const newVideoId = response.data.id; // Assuming the API returns the new row's ID
+      setVideoId(newVideoId);
+      console.log("videoId", newVideoId);
       setPlayVideo(true);
       console.log("Save video data result:", response.data);
+      return newVideoId; // Return the new video ID
     } catch (error) {
       console.error("Error saving video data:", error);
     } finally {
