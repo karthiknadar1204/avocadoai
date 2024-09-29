@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SelectTopic from "./_components/SelectTopic";
 import SelectStyle from "./_components/SelectStyle";
@@ -8,6 +8,8 @@ import SelectDuration from "./_components/SelectDuration";
 import { Button } from "@/components/ui/button";
 import CustomLoading from "./_components/CustomLoading";
 import { v4 as uuidv4 } from "uuid";
+import { useContext } from "react";
+import { VideoDataContext } from "../../_context/VideoDataContext";
 
 const FILEURL =
   "https://firebasestorage.googleapis.com/v0/b/avocadoai-5a34b.appspot.com/o/avocado-ai-files%2F5b2dc991-d45f-42fd-9bad-ff696c32bc56.mp3?alt=media&token=6cf83e21-98ee-4a9d-82a1-dba0b6676ca4";
@@ -21,6 +23,8 @@ const CreateNew = () => {
   const [audio, setAudio] = useState(null);
   const [images, setImages] = useState([]);
   const [videoScriptData, setVideoScriptData] = useState(null);
+
+  const { videoData, setVideoData } = useContext(VideoDataContext);
 
   const onHandleInputChange = (fieldName, fieldValue) => {
     setFormData((prev) => ({ ...prev, [fieldName]: fieldValue }));
@@ -53,6 +57,7 @@ const CreateNew = () => {
       console.log("data", response.data);
 
       if (response.data && response.data.result) {
+        setVideoData((prev) => ({ ...prev, videoScript: response.data.result }));
         setVideoScript(response.data.result);
         setVideoScriptData(response.data.result);
         const audioUrl = await GenerateAudio(response.data.result);
@@ -94,15 +99,16 @@ const CreateNew = () => {
       });
       console.log("Audio generation response:", response.data.result);
       setAudio(response.data.result);
+      setVideoData((prev) => ({ ...prev, audio: response.data.result }));
       if (response.data.result) {
-        await getCaption(response.data.result);
+        await getCaption(response.data.result,script);
       }
     } catch (error) {
       console.error("Error generating audio:", error);
     }
   };
 
-  const getCaption = async (fileurl) => {
+  const getCaption = async (fileurl,script) => {
     try {
       setLoading(true);
       console.log("fileurl", fileurl);
@@ -111,7 +117,8 @@ const CreateNew = () => {
       });
       console.log("Caption generation response:", response.data.result);
       setCaptions(response.data.result);
-      await generateImages();
+      setVideoData((prev) => ({ ...prev, captions: response.data.result }));
+      await generateImages(script);
       return response?.data?.result;
     } catch (error) {
       console.error("Error generating caption:", error);
@@ -124,12 +131,12 @@ const CreateNew = () => {
     }
   };
 
-  const generateImages = async () => {
+  const generateImages = async (script) => {
     try {
       setLoading(true);
-      console.log("videoScriptData", videoScriptData);
+      console.log("videoScriptData", script);
       const newImages = [];
-      for (const element of videoScriptData) {
+      for (const element of script) {
         if (element && element.imagePrompt) {
           console.log("Image prompt:", element.imagePrompt);
           const response = await axios.post("/api/generate-image", {
@@ -141,12 +148,18 @@ const CreateNew = () => {
       }
       console.log("All generated images:", newImages);
       setImages(newImages);
+      setVideoData((prev) => ({ ...prev, images: newImages }));
     } catch (error) {
       console.error("Error generating images:", error);
     } finally {
       setLoading(false);
     }
   };
+
+
+  useEffect(() => {
+    console.log("videoData", videoData);
+  }, [videoData]);
 
   return (
     <div className="md:px-20">
