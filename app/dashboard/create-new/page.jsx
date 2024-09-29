@@ -10,6 +10,7 @@ import CustomLoading from "./_components/CustomLoading";
 import { v4 as uuidv4 } from "uuid";
 import { useContext } from "react";
 import { VideoDataContext } from "../../_context/VideoDataContext";
+import PlayerDialog from "../_components/PlayerDialog";
 
 const FILEURL =
   "https://firebasestorage.googleapis.com/v0/b/avocadoai-5a34b.appspot.com/o/avocado-ai-files%2F5b2dc991-d45f-42fd-9bad-ff696c32bc56.mp3?alt=media&token=6cf83e21-98ee-4a9d-82a1-dba0b6676ca4";
@@ -23,6 +24,8 @@ const CreateNew = () => {
   const [audio, setAudio] = useState(null);
   const [images, setImages] = useState([]);
   const [videoScriptData, setVideoScriptData] = useState(null);
+  const [playVideo, setPlayVideo] = useState(true);
+  const [videoId, setVideoId] = useState(6);
 
   const { videoData, setVideoData } = useContext(VideoDataContext);
 
@@ -174,7 +177,10 @@ const CreateNew = () => {
         audioFileUrl: videoData.audio,
         captions: videoData.captions,
         imageList: videoData.images,
-      });
+      }).returning({id:videoData.id})
+      setVideoId(response[0].id);
+      console.log("videoId",videoId);
+      setPlayVideo(true);
       console.log("Save video data result:", response.data);
     } catch (error) {
       console.error("Error saving video data:", error);
@@ -202,6 +208,8 @@ const CreateNew = () => {
         </Button>
       </div>
       <CustomLoading loading={loading} />
+      <PlayerDialog playVideo={playVideo} videoId={videoId} />
+      
       {images.length > 0 && (
         <div className="mt-10">
           <h3 className="text-xl font-bold">Generated Images:</h3>
