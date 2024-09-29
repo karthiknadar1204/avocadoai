@@ -14,7 +14,7 @@ export async function POST(req, res) {
 
     const transcript = await client.transcripts.transcribe(data);
     console.log(transcript.words);
-    return new Response(JSON.stringify({ success: true, transcript: transcript.text }), {
+    return new Response(JSON.stringify({ success: true, transcript: transcript.words }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

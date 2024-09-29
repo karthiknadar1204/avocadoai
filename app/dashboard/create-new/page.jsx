@@ -116,10 +116,11 @@ const CreateNew = () => {
         audioUrl: fileurl,
       });
       console.log("Caption generation response:", response.data.result);
-      setCaptions(response.data.result);
-      setVideoData((prev) => ({ ...prev, captions: response.data.result }));
+      const captionsData = response.data.transcript;
+      setCaptions(captionsData);
+      setVideoData((prev) => ({ ...prev, captions: captionsData }));
       await generateImages(script);
-      return response?.data?.result;
+      return captionsData;
     } catch (error) {
       console.error("Error generating caption:", error);
       if (error.response && error.response.status === 500) {
@@ -159,7 +160,28 @@ const CreateNew = () => {
 
   useEffect(() => {
     console.log("videoData", videoData);
+    if(Object.keys(videoData).length == 4){
+      saveVideoData(videoData);
+    }
   }, [videoData]);
+
+
+  const saveVideoData = async (videoData) => {
+    setLoading(true);
+    try {
+      const response = await axios.post('/api/save-video-data', {
+        script: videoData.videoScript,
+        audioFileUrl: videoData.audio,
+        captions: videoData.captions,
+        imageList: videoData.images,
+      });
+      console.log("Save video data result:", response.data);
+    } catch (error) {
+      console.error("Error saving video data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="md:px-20">
