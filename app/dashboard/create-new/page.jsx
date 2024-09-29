@@ -20,6 +20,8 @@ const CreateNew = () => {
   const [audioFileUrl, setAudioFileUrl] = useState(null);
   const [captions,setCaptions]=useState()
   const [audio,setAudio]=useState(null)
+  const [images,setImages]=useState([])
+  const [videoScriptData, setVideoScriptData] = useState(null);
 
   const onHandleInputChange = (fieldName, fieldValue) => {
     setFormData((prev) => ({ ...prev, [fieldName]: fieldValue }));
@@ -27,7 +29,6 @@ const CreateNew = () => {
 
   const onCreateClickHandler = () => {
     getVideoScript();
-    // getCaption(FILEURL);
   };
 
   const getVideoScript = async () => {
@@ -49,9 +50,15 @@ const CreateNew = () => {
 
       const response = await axios.post("/api/get-video-script", { prompt: prompt });
       console.log("data", response.data);
+      //this has to be passed to generate images via iteration mkc.
+
+
+
+
       
       if (response.data && response.data.result) {
         setVideoScript(response.data.result);
+        setVideoScriptData(response.data.result);
         const audioUrl = await GenerateAudio(response.data.result);
         setAudioFileUrl(audioUrl);
       } else {
@@ -101,7 +108,7 @@ const CreateNew = () => {
       const response = await axios.post("/api/generate-caption", { audioUrl: fileurl });
       console.log("Caption generation response:", response.data.result);
       setCaptions(response.data.result)
-      setLoading(false)
+      generateImages()
       return response?.data?.result;
     } catch (error) {
       console.error("Error generating caption:", error);
@@ -109,6 +116,28 @@ const CreateNew = () => {
         console.error("Server error: ", error.response.data);
       }
       throw error;
+    }
+  };
+
+
+  const generateImages = async () => {
+    try {
+      setLoading(true);
+      console.log("videoScriptData", videoScriptData);
+      const newImages = [];
+      for (const element of videoScriptData) {
+        if (element && element.imagePrompt) {
+          const response = await axios.post("/api/generate-image", { prompt: element.imagePrompt });
+          console.log("Image generation response:", response.data.result);
+          newImages.push(response.data.result);
+        }
+      }
+      console.log("All generated images:", newImages);
+      setImages(newImages);
+    } catch (error) {
+      console.error("Error generating images:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,6 +160,16 @@ const CreateNew = () => {
         </Button>
       </div>
       <CustomLoading loading={loading} />
+      {images.length > 0 && (
+        <div className="mt-10">
+          <h3 className="text-xl font-bold">Generated Images:</h3>
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            {images.map((imageUrl, index) => (
+              <img key={index} src={imageUrl} alt={`Generated image ${index + 1}`} className="w-full h-auto" />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
