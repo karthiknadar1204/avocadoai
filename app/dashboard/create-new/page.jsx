@@ -178,7 +178,7 @@ const CreateNew = () => {
         captions: videoData.captions,
         imageList: videoData.images,
       });
-      const newVideoId = response.data.id; // Assuming the API returns the new row's ID
+      const newVideoId = response?.data[0]?.id; // Assuming the API returns the new row's ID
       setVideoId(newVideoId);
       console.log("videoId", newVideoId);
       setPlayVideo(true);
