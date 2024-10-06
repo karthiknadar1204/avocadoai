@@ -160,14 +160,12 @@ const CreateNew = () => {
     }
   };
 
-
   useEffect(() => {
     console.log("videoData", videoData);
     if(Object.keys(videoData).length == 4){
       saveVideoData(videoData);
     }
   }, [videoData]);
-
 
   const saveVideoData = async (videoData) => {
     setLoading(true);
@@ -178,12 +176,12 @@ const CreateNew = () => {
         captions: videoData.captions,
         imageList: videoData.images,
       });
-      const newVideoId = response?.data[0]?.id; // Assuming the API returns the new row's ID
+      const newVideoId = response?.data[0]?.id;
       setVideoId(newVideoId);
       console.log("videoId", newVideoId);
       setPlayVideo(true);
       console.log("Save video data result:", response.data);
-      return newVideoId; // Return the new video ID
+      return newVideoId;
     } catch (error) {
       console.error("Error saving video data:", error);
     } finally {
@@ -191,37 +189,38 @@ const CreateNew = () => {
     }
   };
 
+  const handleCloseDialog = () => {
+    setPlayVideo(false);
+    setVideoId(null);
+  };
+
   return (
-    <div className="md:px-20">
-      <h2 className="text-2xl font-bold">Create New Video</h2>
-      <div className="mt-10 shadow-md p-10">
-        {/* select topic */}
+    <div className="md:px-20 bg-gray-900 text-gray-100 min-h-screen">
+      <h2 className="text-3xl font-bold pt-10 text-gray-100">Create New Video</h2>
+      <div className="mt-10 shadow-md p-10 bg-gray-800 rounded-lg">
         <SelectTopic onUserSelect={onHandleInputChange} />
-
-        {/* select style */}
         <SelectStyle onUserSelect={onHandleInputChange} />
-
-        {/* Duration */}
         <SelectDuration onUserSelect={onHandleInputChange} />
-
-        {/* Create Video */}
-        <Button className="mt-10" onClick={onCreateClickHandler}>
+        <Button
+          className="mt-10 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+          onClick={onCreateClickHandler}
+        >
           Create Video
         </Button>
       </div>
       <CustomLoading loading={loading} />
-      <PlayerDialog playVideo={playVideo} videoId={videoId} />
+      <PlayerDialog playVideo={playVideo} videoId={videoId} onClose={handleCloseDialog} />
       
       {images.length > 0 && (
         <div className="mt-10">
-          <h3 className="text-xl font-bold">Generated Images:</h3>
+          <h3 className="text-2xl font-bold text-gray-100">Generated Images:</h3>
           <div className="grid grid-cols-2 gap-4 mt-4">
             {images.map((imageUrl, index) => (
               <img
                 key={index}
                 src={imageUrl}
                 alt={`Generated image ${index + 1}`}
-                className="w-full h-auto"
+                className="w-full h-auto rounded-lg shadow-md"
               />
             ))}
           </div>

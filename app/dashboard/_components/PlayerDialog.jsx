@@ -46,12 +46,12 @@ const PlayerDialog = ({ playVideo, videoId, onClose }) => {
 
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-      <DialogContent className="flex flex-col items-center justify-center">
+      <DialogContent className="flex flex-col items-center justify-center bg-gray-900 text-white">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold my-5">
+          <DialogTitle className="text-2xl font-bold my-5 text-white">
             Video Player
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-gray-300">
             <Player
               component={RemotionVideo}
               durationInFrames={Number(durationInFrame.toFixed(0))}
@@ -66,8 +66,8 @@ const PlayerDialog = ({ playVideo, videoId, onClose }) => {
               }}
             />
             <div className="flex gap-10 mt-10">
-              <Button onClick={handleCancel}>Cancel</Button>
-              <Button>Export</Button>
+              <Button onClick={handleCancel} className="bg-gray-700 text-white hover:bg-gray-600">Cancel</Button>
+              <Button className="bg-gray-700 text-white hover:bg-gray-600">Export</Button>
             </div>
           </DialogDescription>
         </DialogHeader>
