@@ -134,7 +134,7 @@ const CreateNew = () => {
       setLoading(false);
     }
   };
-
+  // https://firebasestorage.googleapis.com/v0/b/avocadoai-5a34b.appspot.com/o/avocado-ai-files%2F1728194739955.png?alt=media&token=3c746721-553f-41fc-be8c-2b47c6edacc7
   const generateImages = async (script) => {
     try {
       setLoading(true);
@@ -214,7 +214,7 @@ const CreateNew = () => {
       {images.length > 0 && (
         <div className="mt-10">
           <h3 className="text-2xl font-bold text-gray-100">Generated Images:</h3>
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 gap-4 mt-4">
             {images.map((imageUrl, index) => (
               <img
                 key={index}

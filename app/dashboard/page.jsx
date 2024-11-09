@@ -10,6 +10,8 @@ import RemotionVideo from "./_components/RemotionVideo";
 import PlayerDialog from "./_components/PlayerDialog";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useUser } from "@clerk/clerk-react";
+import { eq } from "drizzle-orm";
 
 const videoTitles = [
   "Cosmic Journey", "Ocean Depths", "Mountain Peak", "Urban Jungle",
@@ -73,20 +75,28 @@ const Page = () => {
   const [playVideo, setPlayVideo] = useState(false);
   const [videoId, setVideoId] = useState(null);
   const [hovered, setHovered] = useState(null);
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchVideoData = async () => {
       try {
-        const data = await db.select().from(VideoData);
-        setVideoList(data);
-        console.log("Fetched video data:", data);
+        if (user?.primaryEmailAddress?.emailAddress) {
+          const data = await db
+            .select()
+            .from(VideoData)
+            .where(eq(VideoData.userEmail, user.primaryEmailAddress.emailAddress));
+          setVideoList(data);
+          console.log("Fetched video data:", data);
+        }
       } catch (error) {
         console.error("Error fetching video data:", error);
       }
     };
 
-    fetchVideoData();
-  }, []);
+    if (user) {
+      fetchVideoData();
+    }
+  }, [user]);
 
   console.log("Current videoList state:", videoList);
 

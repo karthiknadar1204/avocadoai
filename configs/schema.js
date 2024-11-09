@@ -13,5 +13,6 @@ export const VideoData = pgTable("VideoData", {
     audioFileUrl: varchar("audioFileUrl").notNull(),
     captions: json("captions").notNull(),
     imageList: varchar("imageList").array(),
+    userEmail: varchar("userEmail").notNull()
 });
 
