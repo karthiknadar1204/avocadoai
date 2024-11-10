@@ -13,9 +13,11 @@ const Header = () => {
         </Link>
       </div>
       <div className="flex items-center gap-4">
-        <Button className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold py-2 px-4 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-          Dashboard
-        </Button>
+        <Link href="/dashboard">
+          <Button className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold py-2 px-4 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+            Dashboard
+          </Button>
+        </Link>
         <UserButton 
           appearance={{
             elements: {
