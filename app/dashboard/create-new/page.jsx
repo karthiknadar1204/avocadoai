@@ -28,6 +28,7 @@ const CreateNew = () => {
   const [playVideo, setPlayVideo] = useState(false);
   const [videoId, setVideoId] = useState(null);
   const [useGettyImages, setUseGettyImages] = useState(false);
+  const [videoUrls, setVideoUrls] = useState([]);
 
   const { videoData, setVideoData } = useContext(VideoDataContext);
 
@@ -143,14 +144,47 @@ const CreateNew = () => {
       setLoading(true);
       console.log("videoScriptData", script);
       const newImages = [];
+      const videoUrls = [];
       
-      // If using Getty Images, we'll just use placeholder images for now
+      // If using Getty Images, we'll use Pexels API
       if (useGettyImages) {
-        // For demo purposes, just create placeholder Getty image URLs
-        for (let i = 0; i < script.length; i++) {
-          if (script[i] && script[i].imagePrompt) {
-            // In a real implementation, you would integrate with Getty Images API
-            newImages.push(`https://via.placeholder.com/1024x1280/333333/FFFFFF?text=Getty+Image+${i+1}`);
+        for (const element of script) {
+          if (element && element.contextText) {
+            // Extract a good search term from the context text
+            // Use the first 5-10 words as a search query
+            const searchQuery = element.contextText
+              .split(' ')
+              .slice(0, 7)
+              .join(' ')
+              .replace(/[^\w\s]/gi, ''); // Remove punctuation
+            
+            console.log("Pexels search query:", searchQuery);
+            
+            try {
+              const response = await axios.post("/api/fetch-pexels-video", {
+                query: searchQuery,
+              });
+              
+              console.log("Pexels response:", response.data);
+              
+              if (response.data.result) {
+                newImages.push(response.data.result);
+                // Store video URL if available
+                if (response.data.videoUrl) {
+                  videoUrls.push(response.data.videoUrl);
+                } else {
+                  videoUrls.push(null);
+                }
+              } else {
+                // Fallback to placeholder if no result
+                newImages.push(`https://via.placeholder.com/1024x1280/333333/FFFFFF?text=Getty+Image+${newImages.length+1}`);
+                videoUrls.push(null);
+              }
+            } catch (error) {
+              console.error("Error fetching from Pexels:", error);
+              newImages.push(`https://via.placeholder.com/1024x1280/333333/FFFFFF?text=Getty+Image+${newImages.length+1}`);
+              videoUrls.push(null);
+            }
           }
         }
       } else {
@@ -169,7 +203,17 @@ const CreateNew = () => {
       
       console.log("All generated images:", newImages);
       setImages(newImages);
-      setVideoData((prev) => ({ ...prev, images: newImages }));
+      
+      // Store video URLs in state if using Getty Images
+      if (useGettyImages) {
+        setVideoData((prev) => ({ 
+          ...prev, 
+          images: newImages,
+          videoUrls: videoUrls 
+        }));
+      } else {
+        setVideoData((prev) => ({ ...prev, images: newImages }));
+      }
     } catch (error) {
       console.error("Error generating images:", error);
     } finally {
