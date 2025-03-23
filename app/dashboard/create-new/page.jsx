@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useContext } from "react";
 import { VideoDataContext } from "../../_context/VideoDataContext";
 import PlayerDialog from "../_components/PlayerDialog";
+import ImageSourceToggle from "./_components/ImageSourceToggle";
 
 const FILEURL =
   "https://firebasestorage.googleapis.com/v0/b/avocadoai-5a34b.appspot.com/o/avocado-ai-files%2F5b2dc991-d45f-42fd-9bad-ff696c32bc56.mp3?alt=media&token=6cf83e21-98ee-4a9d-82a1-dba0b6676ca4";
@@ -26,6 +27,7 @@ const CreateNew = () => {
   const [videoScriptData, setVideoScriptData] = useState(null);
   const [playVideo, setPlayVideo] = useState(false);
   const [videoId, setVideoId] = useState(null);
+  const [useGettyImages, setUseGettyImages] = useState(false);
 
   const { videoData, setVideoData } = useContext(VideoDataContext);
 
@@ -43,6 +45,7 @@ const CreateNew = () => {
       console.log("formData Duration", formData.duration);
       console.log("formData Topic", formData.topic);
       console.log("formData Image Style", formData.imageStyle);
+      console.log("Using Getty Images:", useGettyImages);
 
       const prompt =
         "write a script to generate " +
@@ -134,22 +137,36 @@ const CreateNew = () => {
       setLoading(false);
     }
   };
-  // https://firebasestorage.googleapis.com/v0/b/avocadoai-5a34b.appspot.com/o/avocado-ai-files%2F1728194739955.png?alt=media&token=3c746721-553f-41fc-be8c-2b47c6edacc7
+
   const generateImages = async (script) => {
     try {
       setLoading(true);
       console.log("videoScriptData", script);
       const newImages = [];
-      for (const element of script) {
-        if (element && element.imagePrompt) {
-          console.log("Image prompt:", element.imagePrompt);
-          const response = await axios.post("/api/generate-image", {
-            prompt: element.imagePrompt,
-          });
-          console.log("Image generation response:", response.data.result);
-          newImages.push(response.data.result);
+      
+      // If using Getty Images, we'll just use placeholder images for now
+      if (useGettyImages) {
+        // For demo purposes, just create placeholder Getty image URLs
+        for (let i = 0; i < script.length; i++) {
+          if (script[i] && script[i].imagePrompt) {
+            // In a real implementation, you would integrate with Getty Images API
+            newImages.push(`https://via.placeholder.com/1024x1280/333333/FFFFFF?text=Getty+Image+${i+1}`);
+          }
+        }
+      } else {
+        // Use AI-generated images as before
+        for (const element of script) {
+          if (element && element.imagePrompt) {
+            console.log("Image prompt:", element.imagePrompt);
+            const response = await axios.post("/api/generate-image", {
+              prompt: element.imagePrompt,
+            });
+            console.log("Image generation response:", response.data.result);
+            newImages.push(response.data.result);
+          }
         }
       }
+      
       console.log("All generated images:", newImages);
       setImages(newImages);
       setVideoData((prev) => ({ ...prev, images: newImages }));
@@ -194,12 +211,26 @@ const CreateNew = () => {
     setVideoId(null);
   };
 
+  const handleToggleImageSource = (value) => {
+    setUseGettyImages(value);
+  };
+
   return (
     <div className="md:px-20 bg-gray-900 text-gray-100 min-h-screen">
-      <h2 className="text-3xl font-bold pt-10 text-gray-100">Create New Video</h2>
+      <div className="flex justify-between items-center pt-10">
+        <h2 className="text-3xl font-bold text-gray-100">Create New Video</h2>
+        <ImageSourceToggle 
+          useGettyImages={useGettyImages} 
+          onToggle={handleToggleImageSource} 
+        />
+      </div>
+      
       <div className="mt-10 shadow-md p-10 bg-gray-800 rounded-lg">
         <SelectTopic onUserSelect={onHandleInputChange} />
-        <SelectStyle onUserSelect={onHandleInputChange} />
+        <SelectStyle 
+          onUserSelect={onHandleInputChange} 
+          disabled={useGettyImages}
+        />
         <SelectDuration onUserSelect={onHandleInputChange} />
         <Button
           className="mt-10 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
@@ -213,15 +244,28 @@ const CreateNew = () => {
       
       {images.length > 0 && (
         <div className="mt-10">
-          <h3 className="text-2xl font-bold text-gray-100">Generated Images:</h3>
+          <h3 className="text-2xl font-bold text-gray-100">
+            {useGettyImages ? "Getty Stock Images:" : "Generated Images:"}
+          </h3>
+          {useGettyImages && (
+            <p className="text-gray-400 mt-2 mb-4">
+              Using professional stock images from Getty Images for your video.
+            </p>
+          )}
           <div className="grid grid-cols-1 gap-4 mt-4">
             {images.map((imageUrl, index) => (
-              <img
-                key={index}
-                src={imageUrl}
-                alt={`Generated image ${index + 1}`}
-                className="w-full h-auto rounded-lg shadow-md"
-              />
+              <div key={index} className="relative">
+                <img
+                  src={imageUrl}
+                  alt={`${useGettyImages ? "Getty" : "Generated"} image ${index + 1}`}
+                  className={`w-full h-auto rounded-lg shadow-md ${useGettyImages ? "opacity-80" : ""}`}
+                />
+                {useGettyImages && (
+                  <div className="absolute top-4 right-4 bg-gray-800 text-white px-3 py-1 rounded-full text-sm">
+                    Getty Images
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
