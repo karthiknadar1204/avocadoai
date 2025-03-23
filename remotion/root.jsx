@@ -12,9 +12,18 @@ const RemotionRoot = () => {
         fps={30}
         width={1280}
         height={720}
+        defaultProps={{
+          script: null,
+          audioFileUrl: null,
+          captions: null,
+          imageList: [],
+          videoUrls: [],
+          isGettyImages: false,
+          setDurationInFrame: () => {},
+        }}
       />
     </>
   );
 };
 
-export default RemotionRoot ;
+export default RemotionRoot;

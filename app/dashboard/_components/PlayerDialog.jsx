@@ -37,6 +37,13 @@ const PlayerDialog = ({ playVideo, videoId, onClose }) => {
     setVideoData(result[0]);
   };
 
+  // This function ensures we always have an integer value for duration
+  const setDurationInFrameHandler = (value) => {
+    // Convert to integer by rounding up
+    const intValue = Math.ceil(value);
+    setDurationInFrame(intValue);
+  };
+
   const handleCancel = () => {
     setOpenDialog(false);
     if (onClose) {
@@ -45,32 +52,39 @@ const PlayerDialog = ({ playVideo, videoId, onClose }) => {
   };
 
   return (
-    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-      <DialogContent className="flex flex-col items-center justify-center bg-gray-900 text-white">
+    <Dialog open={openDialog} onOpenChange={handleCancel}>
+      <DialogContent className="sm:max-w-[90%] max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold my-5 text-white">
-            Video Player
-          </DialogTitle>
-          <DialogDescription className="text-gray-300">
-            <Player
-              component={RemotionVideo}
-              durationInFrames={Number(durationInFrame.toFixed(0))}
-              compositionWidth={300}
-              compositionHeight={450}
-              fps={30}
-              controls={true}
-              inputProps={{
-                ...videoData,
-                setDurationInFrame: (frameValue) =>
-                  setDurationInFrame(frameValue),
-              }}
-            />
-            <div className="flex gap-10 mt-10">
-              <Button onClick={handleCancel} className="bg-gray-700 text-white hover:bg-gray-600">Cancel</Button>
-              <Button className="bg-gray-700 text-white hover:bg-gray-600">Export</Button>
-            </div>
+          <DialogTitle>Video Preview</DialogTitle>
+          <DialogDescription>
+            Here's a preview of your generated video
           </DialogDescription>
         </DialogHeader>
+        <div className="mt-4">
+          {videoData && (
+            <Player
+              component={RemotionVideo}
+              durationInFrames={Math.ceil(durationInFrame)}
+              fps={30}
+              compositionWidth={1280}
+              compositionHeight={720}
+              style={{ width: "100%" }}
+              controls
+              inputProps={{
+                script: videoData.script,
+                audioFileUrl: videoData.audioFileUrl,
+                captions: videoData.captions,
+                imageList: videoData.imageList,
+                videoUrls: videoData.videoUrls,
+                isGettyImages: videoData.isGettyImages,
+                setDurationInFrame: setDurationInFrameHandler,
+              }}
+            />
+          )}
+        </div>
+        <div className="flex justify-end mt-4">
+          <Button onClick={handleCancel}>Close</Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

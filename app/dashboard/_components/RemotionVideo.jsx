@@ -8,6 +8,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
   Easing,
+  Video,
 } from "remotion";
 
 const RemotionVideo = ({
@@ -15,6 +16,8 @@ const RemotionVideo = ({
   audioFileUrl,
   captions,
   imageList,
+  videoUrls,
+  isGettyImages,
   setDurationInFrame,
 }) => {
   const { fps } = useVideoConfig();
@@ -79,16 +82,29 @@ const RemotionVideo = ({
               <AbsoluteFill
                 style={{ justifyContent: "center", alignItems: "center" }}
               >
-                <Img
-                  src={item}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    transform: `scale(${scale})`,
-                    opacity: opacity,
-                  }}
-                />
+                {isGettyImages && videoUrls && videoUrls[index] ? (
+                  <Video
+                    src={videoUrls[index]}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: opacity,
+                    }}
+                    muted
+                  />
+                ) : (
+                  <Img
+                    src={item}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      transform: `scale(${scale})`,
+                      opacity: opacity,
+                    }}
+                  />
+                )}
                 <AbsoluteFill
                   style={{
                     color: "white",
