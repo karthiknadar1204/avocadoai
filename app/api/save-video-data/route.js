@@ -7,13 +7,15 @@ import { currentUser } from '@clerk/nextjs/server'
 export async function POST(req) {
     try {
         const user = await currentUser();
-        const { script, audioFileUrl, captions, imageList } = await req.json();
+        const { script, audioFileUrl, captions, imageList, videoUrls, isGettyImages } = await req.json();
         
         const result = await db.insert(VideoData).values({
             script,
             audioFileUrl,
             captions,
             imageList,
+            videoUrls: videoUrls || [],
+            isGettyImages: isGettyImages || false,
             userEmail: user.primaryEmailAddress.emailAddress
         }).returning();
 

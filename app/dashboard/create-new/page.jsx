@@ -223,7 +223,7 @@ const CreateNew = () => {
 
   useEffect(() => {
     console.log("videoData", videoData);
-    if(Object.keys(videoData).length == 4){
+    if (videoData.videoScript && videoData.audio && videoData.captions && videoData.images) {
       saveVideoData(videoData);
     }
   }, [videoData]);
@@ -236,6 +236,8 @@ const CreateNew = () => {
         audioFileUrl: videoData.audio,
         captions: videoData.captions,
         imageList: videoData.images,
+        videoUrls: videoData.videoUrls || [],
+        isGettyImages: useGettyImages
       });
       const newVideoId = response?.data[0]?.id;
       setVideoId(newVideoId);
