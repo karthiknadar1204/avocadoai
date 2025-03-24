@@ -1,4 +1,4 @@
-import { serial, text, pgTable, pgSchema,varchar, json } from "drizzle-orm/pg-core";
+import { serial, text, pgTable, pgSchema,varchar, json, boolean } from "drizzle-orm/pg-core";
 
 export const Users = pgTable("users", {
     id: serial("id").primaryKey(),
@@ -7,12 +7,14 @@ export const Users = pgTable("users", {
     imageUrl: varchar("imageUrl")
 });
 
-export const VideoData = pgTable("VideoData", {
+export const VideoData = pgTable("video_data", {
     id: serial("id").primaryKey(),
     script: json("script").notNull(),
     audioFileUrl: varchar("audioFileUrl").notNull(),
     captions: json("captions").notNull(),
     imageList: varchar("imageList").array(),
+    videoUrls: varchar("videoUrls").array(),
+    isGettyImages: boolean("isGettyImages").default(false),
     userEmail: varchar("userEmail").notNull()
 });
 
